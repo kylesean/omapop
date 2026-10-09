@@ -5,6 +5,7 @@ import Quickshell
 import qs.Commons
 import qs.Ui
 import "Actions.js" as Actions
+import "." as Plugin
 
 // Bar icon for Omapop. Left click opens a small panel listing the installed
 // extensions with on/off switches, the JavaScript runtime in use, and a few
@@ -17,7 +18,14 @@ Panel {
     manageIpc: false
 
     readonly property string pluginId: "io.github.jondkinney.omapop"
-    readonly property var service: bar && bar.shell && typeof bar.shell.serviceFor === "function" ? bar.shell.serviceFor(pluginId) : null
+    // Prefer the in-process service instance published by Service.qml. Under a
+    // replacement bar the host's `bar.shell.serviceFor` is a capability-scoped
+    // facade that returns null for another plugin's service, which left this
+    // widget with no service: an empty panel and inert controls. Fall back to
+    // the host lookup for shells that expose it and have not yet published.
+    readonly property var service: Plugin.OmapopState.service
+        ? Plugin.OmapopState.service
+        : (bar && bar.shell && typeof bar.shell.serviceFor === "function" ? bar.shell.serviceFor(pluginId) : null)
     readonly property bool paused: service ? service.paused : false
     readonly property bool engineReady: service ? service.engineReady : false
     readonly property var extensions: service ? service.extensions : []

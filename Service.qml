@@ -6,6 +6,7 @@ import Quickshell.Wayland
 import qs.Commons
 import "Actions.js" as Actions
 import "OutputBuffer.js" as OutputBuffer
+import "." as Plugin
 
 // Omapop: select text, get a bar of actions beside the pointer.
 //
@@ -2590,6 +2591,9 @@ Item {
 
     Component.onCompleted: {
         log("service starting from " + pluginDir)
+        // Publish this instance for BarWidget.qml (see OmapopState.qml): under a
+        // replacement bar the host facade cannot resolve our own service.
+        Plugin.OmapopState.service = root
         watchProc.running = true
         if (accessibilityProbe)
             contextProc.running = true
@@ -2601,6 +2605,8 @@ Item {
     }
 
     Component.onDestruction: {
+        if (Plugin.OmapopState.service === root)
+            Plugin.OmapopState.service = null
         if (popup.visible)
             popup.dismiss()
     }
