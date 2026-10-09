@@ -197,7 +197,13 @@ test("editing actions and editability", () => {
 });
 
 test("misc", () => {
-  assert.equal(A.truncateResult("x".repeat(200)).length, 160);
+  // Multi-line results keep their line structure so show-result can wrap them;
+  // long output is still bounded rather than hard-capped at one line.
+  assert.equal(A.truncateResult("a\n\n\n b \n c "), "a\n\nb\nc");
+  assert.equal(A.truncateResult("x".repeat(200)).length, 200);
+  assert.equal(A.truncateResult("x".repeat(2500)).length, 2000);
+  assert.equal(A.truncateResult("x".repeat(2500)).endsWith("…"), true);
+  assert.equal(A.truncateResult("line one\nline two"), "line one\nline two");
   assert.equal(A.isTerminalClass("Alacritty", []), true);
   assert.equal(A.isTerminalClass("chromium", []), false);
   assert.equal(A.isTerminalClass("MyTerm", ["myterm"]), true);
