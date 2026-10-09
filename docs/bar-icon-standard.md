@@ -93,6 +93,45 @@ A shape with little ink - a solid speaker, for example - can also read as
 "small" even at the right width, because its mass is concentrated. That is a
 property of the drawing, not a sizing error.
 
+### A glyph that is not in the resolved font
+
+This is the trap that makes an icon look oversized even when it is drawn
+correctly. The bar's `monospace` family resolves through fontconfig, and a
+glyph that the first face does not contain falls back to the next Nerd Font in
+the chain. The fallback face can have a **larger advance and larger ink** for
+the same code point, so the icon silently grows.
+
+A real example: `omarchy.agents` uses `md-robot_excited` (U+F16A3). At a 15px
+font:
+
+| face | contains U+F16A3 | ink width | advance |
+|---|---|---|---|
+| Sarasa Term SC Nerd (`monospace` first choice) | no | - | - |
+| JetBrainsMono Nerd Font (fallback) | yes | **13.77px** | 9.00px |
+| FiraCode Nerd Font (fallback) | yes | **13.77px** | 9.23px |
+
+The mark renders at 13.77px, about 1.8x the 7.5px standard, and reads as the
+heaviest icon in the bar. The same code point in the *first* face would have
+been fine; the fallback is what breaks it.
+
+**Fix:** use a glyph the resolved face actually contains. `md-robot` (U+F06A9)
+is in Sarasa Term SC Nerd and paints 7.50px, so it is a drop-in replacement for
+`md-robot_excited` with the same meaning at the correct size.
+
+To check whether a glyph is in the first face, or how wide a fallback renders
+it, query the font directly:
+
+```sh
+# Which face does monospace resolve to?
+fc-match monospace
+
+# Measure a candidate glyph (fontTools): see docs/bar-icon-standard.md history
+# for the BoundsPen snippet used to produce the table above.
+```
+
+The general rule stands either way: an icon must paint `Style.bar.iconFont / 2`
+of ink. If a glyph does not, it is the wrong glyph.
+
 ### Do not size from the optical canvas
 
 `BarIconButton` also exposes `Style.bar.iconCanvas`, the rounded box it hands
