@@ -119,6 +119,9 @@ Panel {
                 anchors.fill: parent
                 color: button.foreground
                 paused: root.paused
+                // Ink half the icon font size, exactly like the Nerd Font
+                // glyphs the built-in bar widgets draw.
+                inkWidth: Style.bar.iconFont / 2
             }
         }
         foreground: root.paused || !root.engineReady ? Qt.darker(root.barForeground, 1.55) : root.barForeground
@@ -159,6 +162,8 @@ Panel {
                 BarIcon {
                     Layout.preferredWidth: Math.round(Style.space(24))
                     Layout.preferredHeight: Math.round(Style.space(24))
+                    // Display-size mark: a header-scale ink width.
+                    inkWidth: Math.round(Style.space(15))
                     color: root.paused ? root.secondaryText : Color.accent
                     paused: root.paused
                 }

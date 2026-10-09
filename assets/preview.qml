@@ -23,7 +23,7 @@ Rectangle {
         font.pixelSize: 15
         font.letterSpacing: 2
     }
-    Plugin.BarIcon { x: 68; y: 114; width: 42; height: 42; color: "#88c0d0" }
+    Plugin.BarIcon { x: 68; y: 114; width: 42; height: 42; inkWidth: 26; color: "#88c0d0" }
     Copy { x: 130; y: 94; text: "Omapop"; font.pixelSize: 62; font.bold: true }
     Copy {
         x: 68; y: 218

@@ -1,27 +1,44 @@
 import QtQuick
 import QtQuick.Shapes
 
-// The bar glyph: a small action pill with three dots floating above a
-// highlighted text selection, which is what Omapop does. Drawn as one
-// even-odd path so the dots and the text line are real holes and the icon
-// works over any bar background. Paused swaps the dots for pause bars.
+// Omapop's bar mark: a small action pill with three dots floating above a
+// highlighted text selection. Drawn as one even-odd path so the dots and the
+// text line are real holes and the mark works over any bar background. Paused
+// swaps the dots for pause bars.
+//
+// Sizing follows the bar's de-facto icon standard. There is no written Omarchy
+// spec, so the built-in widgets are the reference: BarIconButton draws a Nerd
+// Font glyph at Style.bar.iconFont, and every Nerd Font icon glyph paints its
+// ink at exactly half the font size (measured from the font outline: the MDI
+// advance is 0.5em, so 15px -> 7.5px). A drawn mark has to paint that same ink
+// width, or it reads as heavier than its neighbours even when the box matches.
+//
+// The caller passes the ink width. The bar passes Style.bar.iconFont / 2; the
+// panel header passes a display-size width.
 Item {
     id: root
 
     property color color: "white"
     property bool paused: false
 
-    // Geometry is authored on a 16-unit grid and scaled to whatever the bar
-    // hands us for its optical canvas.
-    readonly property real unit: Math.min(width, height) / 16
+    // Painted ink width in pixels. Bar glyphs are Nerd Font icons whose ink is
+    // half their font size, so the bar passes Style.bar.iconFont / 2.
+    property real inkWidth: 8
+
+    // The art spans grid units 1..15, i.e. 14 units, in both axes. The Shape is
+    // authored at its native 16x16 and scaled exactly once about its centre;
+    // scaling both the Shape's width and its transform (as an earlier version
+    // did) overflowed the box and pushed the mark off-centre.
+    readonly property real artSpan: 14
+    readonly property real unit: inkWidth / artSpan
 
     Shape {
         anchors.centerIn: parent
-        width: root.unit * 16
-        height: width
+        width: 16
+        height: 16
         preferredRendererType: Shape.CurveRenderer
         antialiasing: true
-        transform: Scale { xScale: root.unit; yScale: root.unit }
+        transform: Scale { origin.x: 8; origin.y: 8; xScale: root.unit; yScale: root.unit }
 
         ShapePath {
             fillColor: root.color
