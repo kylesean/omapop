@@ -14,7 +14,8 @@ import QtQuick.Shapes
 // width, or it reads as heavier than its neighbours even when the box matches.
 //
 // The caller passes the ink width. The bar passes Style.bar.iconFont / 2; the
-// panel header passes a display-size width.
+// panel header passes a display-size width. The full standard, including how to
+// apply it to your own widget, is in docs/bar-icon-standard.md.
 Item {
     id: root
 

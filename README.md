@@ -589,6 +589,9 @@ running. It does not include selected text or clipboard contents.
 See [catalog maintenance](catalog/README.md) for source collection, review
 decisions, offline compatibility checks and signing a new approval revision.
 
+See [bar icon standard](docs/bar-icon-standard.md) for how the bar sizes icons
+and why Omapop's mark takes `Style.bar.iconFont / 2` as its ink width.
+
 ## License
 
 MIT, see `LICENSE`.
