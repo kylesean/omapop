@@ -56,6 +56,43 @@ microphone 10.2px, bluetooth 11.8px, battery 12.5px at a 15px font. Do not
 force a fixed height. Match the **ink width** and let the shape be as tall as
 the drawing needs; that is what makes the row read as a set.
 
+### "The icons look different sizes"
+
+They are, and that is the intended result. This is the first question most
+people ask, because bluetooth visibly outweighs wifi:
+
+| glyph | ink width | ink height |
+|---|---|---|
+| battery | 7.50px | 12.48px |
+| bluetooth | 7.50px | 11.79px |
+| microphone | 7.50px | 10.20px |
+| power | 7.50px | 7.95px |
+| audio | 7.50px | 7.29px |
+| wifi | 7.50px | 6.27px |
+| keyboard / weather | 7.50px | 4.74px |
+
+Every one of those *widths* is identical; only the heights differ, by a factor
+of 2.6. The row still reads as a set because it follows the rules of type:
+
+- **One advance width.** Horizontal spacing is even, so the row has rhythm.
+- **One shared baseline.** Vertical alignment comes from sitting on the same
+  line, the way `l`, `o` and `b` do in a word.
+- **Similar ink density.** The glyphs carry comparable visual weight even when
+  their bounding boxes differ.
+
+`OpticalGlyph` shows the intent. Its own comment says it best: "Keep the
+shared line box and baseline intact. Correcting only the horizontal painted
+bounds avoids per-glyph vertical drift."
+
+A tall thin glyph (bluetooth, battery, wifi) and a short wide one (keyboard,
+weather) are both correct. Forcing every icon to one bounding box would break
+the baseline and rhythm and look worse. Match the width; let the height be
+whatever the picture needs.
+
+A shape with little ink - a solid speaker, for example - can also read as
+"small" even at the right width, because its mass is concentrated. That is a
+property of the drawing, not a sizing error.
+
 ### Do not size from the optical canvas
 
 `BarIconButton` also exposes `Style.bar.iconCanvas`, the rounded box it hands
