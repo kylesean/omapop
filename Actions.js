@@ -189,6 +189,25 @@ function compileRegex(regex) {
     }
     if (flags.indexOf("u") === -1 && /\\p\{/.test(pattern))
         flags += "u"
+
+    // Qt 6.11's QML engine rejects the ES2018 `s` (dotAll) flag, and the throw
+    // is swallowed by the try/catch below, so an extension whose regex uses
+    // `(?s)` or the `s` flag silently disappears from the bar. Emulate dotAll
+    // instead: rewrite a bare `.` outside a character class to `[\s\S]` and
+    // drop `s`. Escaped dots and dots inside `[...]` keep their meaning.
+    if (flags.indexOf("s") !== -1) {
+        flags = flags.replace(/s/g, "")
+        var out = "", inClass = false, escaped = false
+        for (var k = 0; k < pattern.length; k++) {
+            var ch = pattern.charAt(k)
+            if (escaped) { out += ch; escaped = false; continue }
+            if (ch === "\\") { out += ch; escaped = true; continue }
+            if (ch === "[") { inClass = true; out += ch; continue }
+            if (ch === "]") { inClass = false; out += ch; continue }
+            out += (!inClass && ch === ".") ? "[\\s\\S]" : ch
+        }
+        pattern = out
+    }
     try {
         return new RegExp(pattern, flags.split("").filter(function (c, i, a) { return a.indexOf(c) === i }).join(""))
     } catch (e) {

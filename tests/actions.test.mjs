@@ -95,6 +95,26 @@ test("regex narrows text and exposes groups; bad regex hides", () => {
   assert.equal(A.applyRegex("", "x").ok, true);
 });
 
+// Qt 6.11's QML engine rejects the `s` (dotAll) flag, and the old
+// compileRegex let the throw escape into a `return null`, silently hiding any
+// extension that used `(?s)`. compileRegex now emulates dotAll instead.
+test("dotAll is emulated for the Qt engine that rejects the s flag", () => {
+  // The approved Google Translate package uses exactly this regex.
+  assert.equal(A.applyRegex("(?s)^.{1,1900}$", "hello").ok, true);
+  assert.equal(A.applyRegex("(?s)^.{1,1900}$", "a\nb\nc").ok, true);
+  // Bounded quantifier still refuses too-long input, newlines or not.
+  assert.equal(A.applyRegex("(?s)^.{1,5}$", "abcdef").ok, false);
+  assert.equal(A.applyRegex("(?s)^.{1,5}$", "abcde").ok, true);
+  // Without dotAll a `.` never crosses a newline; with it, it does.
+  assert.equal(A.applyRegex("^a.b$", "a\nb").ok, false);
+  assert.equal(A.applyRegex("(?s)^a.b$", "a\nb").ok, true);
+  // Escaped and character-classed dots keep their literal meaning.
+  assert.equal(A.applyRegex("(?s)^a\\.b$", "a.b").ok, true);
+  assert.equal(A.applyRegex("(?s)^a\\.b$", "axb").ok, false);
+  assert.equal(A.applyRegex("(?s)^a[.]b$", "a.b").ok, true);
+  assert.equal(A.applyRegex("(?s)[.]+", "..").ok, true);
+});
+
 test("app filters map bundle ids to classes", () => {
   assert.equal(A.classMatches(["com.google.Chrome"], "chromium"), true);
   assert.equal(A.classMatches(["com.apple.Terminal"], "foot"), true);
